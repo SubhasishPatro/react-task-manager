@@ -1,0 +1,56 @@
+{
+  "users": [
+    {
+      "user_id": "john123",
+      "user_name": "john",
+      "password": "john",
+      "email": "john@gmail.com",
+      "id": "ISwU63cJNi8"
+    },
+    {
+      "user_id": "sam123",
+      "user_name": "sam",
+      "password": "sam",
+      "email": "sam@gmail.com",
+      "id": "8qYlGr8eUzk"
+    },
+    {
+      "user_id": "ram1234",
+      "user_name": "ramanand",
+      "password": " ram",
+      "email": "raman@gmail.com",
+      "id": "Jx-AHhw5xi8"
+    },
+    {
+      "user_id": "Subhasish123",
+      "user_name": "Subhasish",
+      "password": "Subhasish",
+      "email": "subhasishp2003@gmail.com",
+      "id": "0rHhKo1NJnU"
+    }
+  ],
+  "appointments": [
+    {
+      "id": "yf_t0nXqfhw",
+      "title": "Birthday Party and cakes",
+      "description": "Make Cake & Decorate the room",
+      "date": "2026-09-20",
+      "user_id": "john123"
+    },
+    {
+      "title": "Hangout",
+      "date": "2026-03-07",
+      "description": "Prepare MOM at the end of meething",
+      "user_id": "Subhasish123",
+      "id": "Nz6MpfFhl_s"
+    },
+    {
+      "id": "ZMgNf6PGr00",
+      "title": "Evevning Snacks",
+      "description": "Snacks  @ 7 pm",
+      "date": "2026-09-17",
+      "user_id": "Subhasish123"
+    }
+  ],
+  "$schema": "./node_modules/json-server/schema.json"
+}
