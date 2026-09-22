@@ -13,6 +13,7 @@ export function TaskManagerHome(){
             <div className="mt-3 tab-content">
               <div className="tab-pane active" id="register">
                 <UserRegister/>
+                
               </div>
               <div className="tab-pane" id="login">
                 <UserLogin displayTitle='d-none'/>
