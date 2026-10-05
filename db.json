@@ -27,13 +27,20 @@
       "password": "Subhasish",
       "email": "subhasishp2003@gmail.com",
       "id": "0rHhKo1NJnU"
+    },
+    {
+      "user_id": "Sita123",
+      "user_name": "Sita",
+      "password": "Sita",
+      "email": "sita@gmail.com",
+      "id": "9lTK7Vvl-GM"
     }
   ],
   "appointments": [
     {
       "id": "yf_t0nXqfhw",
       "title": "Birthday Party and cakes",
-      "description": "Make Cake & Decorate the room",
+      "description": "Make Cake & Decorate the room & lights",
       "date": "2026-09-20",
       "user_id": "john123"
     },
@@ -46,10 +53,17 @@
     },
     {
       "id": "ZMgNf6PGr00",
-      "title": "Evevning Snacks",
+      "title": "Evening Snacks",
       "description": "Snacks  @ 7 pm",
       "date": "2026-09-17",
       "user_id": "Subhasish123"
+    },
+    {
+      "title": "Make coffee",
+      "description": "Make coffee at 8 pm",
+      "date": "2026-10-08",
+      "user_id": "john123",
+      "id": "qINfwRRB_6Y"
     }
   ],
   "$schema": "./node_modules/json-server/schema.json"

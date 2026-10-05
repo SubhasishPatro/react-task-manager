@@ -2,6 +2,7 @@ import axios from "axios"
 import { useFormik } from "formik"
 import { useState } from "react";
 import { useNavigate } from "react-router-dom"
+import { API_URL } from "../api";
 
 export function UserRegister(){
 
@@ -20,7 +21,7 @@ export function UserRegister(){
             email: '',
         },
         onSubmit: (user)=>{
-            axios.post('http://localhost:3000/users', user)
+            axios.post(`${API_URL}/users`, user)
             .then(()=>{
                 alert("Registered Successfully..");
                 navigate('/login');
@@ -29,7 +30,7 @@ export function UserRegister(){
     })
 
     function VerifyUser(e){
-        axios.get(`http://localhost:3000/users`)
+        axios.get(`${API_URL}/users`)
         .then(response=>{
             for(var item of response.data){
                 if(item.user_id===e.target.value){

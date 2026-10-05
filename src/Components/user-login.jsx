@@ -2,6 +2,8 @@ import axios from "axios";
 import { useFormik } from "formik"
 import { useCookies } from "react-cookie";
 import { useNavigate } from "react-router-dom";
+import { useCaptcha } from "../hooks/Captcha";
+import { API_URL } from "../api";
 
 
 export function UserLogin(props){
@@ -16,7 +18,7 @@ export function UserLogin(props){
             password: '',
         },
         onSubmit:(user)=>{
-            axios.get(`http://localhost:3000/users`)
+            axios.get(`${API_URL}/users`)
             .then(response=>{
                 var result = response.data.find(item => item.user_id===user.user_id);
                 if(result){

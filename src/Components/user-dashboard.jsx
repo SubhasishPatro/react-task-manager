@@ -1,19 +1,25 @@
 import axios from "axios";
 import { useFormik } from "formik";
 import moment from "moment";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useCookies } from "react-cookie";
+import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
+import { taskStore } from "../Store/TaskStore";
+import { addToShare } from "../Slicers/TaskSlicer";
+import { API_URL } from "../api";
 
 export function UserDashBoard(){
 
     let navigate =  useNavigate();
+    let dispath = useDispatch();
 
     const [cookies, setCookies, removeCookies] = useCookies(['username', 'user_id']);
 
     const [appointments, setAppointments] = useState([{id: null, title: null, description: null, date: null, user_id: null}]);
     
     const [appointment, setAppointment] = useState({id: '', title: '', description: '', date: '', user_id: ''});
+    const [searchString, setSearchString] = useState('');
 
     const formNewTask = useFormik({
         initialValues: {
@@ -23,7 +29,7 @@ export function UserDashBoard(){
             user_id: cookies['user_id']
         },
         onSubmit: (appointments)=>{
-            axios.post(`http://localhost:3000/appointments`, appointments)
+            axios.post(`${API_URL}/appointments`, appointments)
             .then(()=>{
                 LoadAppointments();
             })
@@ -40,7 +46,7 @@ export function UserDashBoard(){
             user_id: appointment.user_id
         },
         onSubmit: (appointments)=>{
-            axios.put(`http://localhost:3000/appointments/${appointments.id}`, appointments)
+            axios.put(`${API_URL}/appointments/${appointments.id}`, appointments)
             .then(()=>{
                 LoadAppointments();
             })
@@ -48,13 +54,23 @@ export function UserDashBoard(){
         enableReinitialize: true
     });
     
-    function LoadAppointments(){
-        axios.get(`http://localhost:3000/appointments`)
+    // Whenever some changes happened then only this will update, otherwise it only uses the cached data(appointments)
+    const LoadAppointments = useCallback(()=>{
+        axios.get(`${API_URL}/appointments`)
         .then(response=>{
-            let user_appointments = response.data.filter(item=>item.user_id===cookies['user_id']);
-            setAppointments(user_appointments);
+            setAppointments(response.data);
         });
-    };
+    },[appointments]);
+
+    //Here cached data will be used qhen required, No need to fetch the task again and again
+    const filteredAppointments = useMemo(()=>{
+        if(searchString===''){
+            return appointments.filter(appointment=> appointment.user_id===cookies['user_id']);
+        }
+        else{
+            return appointments.filter(appointment=> appointment.user_id===cookies['user_id']).filter(item=>item.title.toLowerCase().includes(searchString.toLowerCase()));
+        }
+    }, [appointments, cookies['user_id']]);
 
     function handleSignout(){
         removeCookies('user_id');
@@ -69,16 +85,29 @@ export function UserDashBoard(){
     function handleDeleteClick(appointment){
         let flag = confirm(`Are you sure want to Delete\n${appointment.title.toUpperCase()}`)
         if(flag==true){
-            axios.delete(`http://localhost:3000/appointments/${appointment.id}`)
+            axios.delete(`${API_URL}/appointments/${appointment.id}`)
             .then(()=>{
                 LoadAppointments();
             })
         }
     }
 
+    function handleSearchChange(e){
+        setSearchString(e.target.value);
+    }
+    
+    function handleShareClick(appointment){
+        dispath(addToShare(appointment));
+        alert('Appointment Shared Successfully')
+    }
+
+
+
+
+
     useEffect(()=>{
         LoadAppointments();
-    }, [appointments]);
+    }, [appointments, taskStore]);
     
 
 
@@ -89,6 +118,38 @@ export function UserDashBoard(){
                     <div className="fs-1 fw-bold text-primary">Task Flow</div>
                         <ul className="list-group">
                             <li className="list-group-item list-group-item-light p-3"><span className="bi bi-columns-gap fw-bold text-primary"> {cookies['username']}'s DashBoard</span></li>
+                            <li className="list-group-item p-3 list-group-item-light"><button data-bs-target="#shared" data-bs-toggle="offcanvas" className="btn btn-dark bi bi-share w-100 position-relative"> Shared <span className="badge bg-danger rounded rounded-circle position-absolute">{taskStore.getState().sharedTasksCount}</span></button></li>
+
+
+                            <div className="offcanvas offcanvas-start" id="shared">
+                                <div className="offcanvas-header">
+                                    <h4>Shared Appointments</h4>
+                                    <button className="btn btn-close" data-bs-dismiss="offcanvas"></button>
+                                </div>
+                                <div className="offcanvas-body">
+                                    <table className="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Title</th>
+                                                <th>User</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {
+                                                taskStore.getState().sharedTasks.map(task=>
+                                                    <tr key={task.id}>
+                                                        <td>{task.title}</td>
+                                                        <td>{task.user_id}</td>
+                                                    </tr>
+                                                )
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+
+
                             <li className="list-group-item list-group-item-light p-3 my-3"><button className="btn btn-primary w-100" data-bs-target='#newTask' data-bs-toggle='modal'><span className="bi bi-plus-lg"></span>New Appointment</button></li>
                             <li className="list-group-item list-group-item-light p-3 my-3"><span className="bi bi-check-circle"> Tasks</span></li>
                             <li className="list-group-item list-group-item-light p-3"><span className="bi bi-calendar-date"> Calender</span></li>
@@ -100,11 +161,18 @@ export function UserDashBoard(){
             </div>
             <div className="col-10">
                 <div className="bg-light p-5 mt-3">
-                    Filter, Search
+                    <div>
+                        <div className="position-relative">
+                            <span className="bi position-absolute bi-search" style={{top:'5px', left:'10px'}}></span><input onChange={handleSearchChange} type="text" className="form-control ps-5" placeholder="search appointments"/>
+                        </div>
+                    </div>
                 </div>
                 <div className="d-flex flex-wrap">
                     {
-                        appointments.map(appointment=>
+                        (filteredAppointments.length===0)?
+                        <div className="mt-4">No Appointments Found</div>
+                        :
+                        filteredAppointments.map(appointment=>
                             <div key={appointment.id} className="card m-2 p-2" style={{width:'500px'}}>
                                 <div className="card-header d-flex justify-content-between">
                                     <span className="text-uppercase fw-bold">{appointment.title}</span>
@@ -116,6 +184,7 @@ export function UserDashBoard(){
                                     <div className="card-footer">
                                         <button data-bs-target='#editTask' data-bs-toggle='modal' onClick={()=>handleEditClick(appointment)} className="btn btn-warning bi bi-pen-fill"></button>
                                         <button onClick={()=>handleDeleteClick(appointment)} className="btn btn-danger bi bi-trash-fill mx-2"></button>
+                                        <button onClick={()=>handleShareClick(appointment)} className="btn btn-dark bi bi-share-fill"></button>
                                     </div>
                             </div>
                         )
